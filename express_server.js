@@ -16,15 +16,26 @@ const generateRandomString = function () {
   return randomString
 }
 
-const duplicateEmail = function (newEmail) {
-  let dupeValue = false
+const checkExisting = function (value, key) {
+  let isExisting = false
 
   Object.values(users).forEach(user => {
-    if (user.email === newEmail) {
-      return dupeValue = true;
+    if (user[key] === value) {
+      return isExisting = true;
     }
   })
-  return dupeValue
+  return isExisting
+}
+
+const userRetrieval = function (email) {
+  let userId;
+
+  Object.values(users).forEach(user => {
+    if (user.email === email) {
+      userId = user
+    }
+  })
+  return userId
 }
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -55,6 +66,13 @@ app.get("/", (req, res) => {
     greeting: 'Hello World!'
   };
   res.render("hello_world", templateVars);
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = {
+    "user_id": users[req.cookies["user_id"]],
+  };
+  res.render("login", templateVars);
 });
 
 app.get("/register", (req, res) => {
@@ -93,11 +111,31 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+app.post("/login", (req, res) => {
+  userObj = userRetrieval(req.body.email)
+  
+  if (!userObj) {
+    res.status(400).send(`Invalid credentials.`)
+
+  } else if (userObj.email === req.body.email && userObj.password === req.body.password) {
+    res.cookie("user_id", userObj.id)
+    res.redirect(`/urls/`)
+
+  } else {
+    res.status(400).send(`Invalid credentials.`)
+  }
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id")
+  res.redirect(`/urls/`)
+});
+
 app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
     res.status(400).send(`Please enter an email and password.`)
 
-  } else if (duplicateEmail(req.body.email) === true) {
+  } else if (checkExisting(req.body.email, 'email') === true) {
     res.status(400).send(`This email is already registered.`)
 
   } else {
@@ -125,16 +163,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.newURL
-  res.redirect(`/urls/`)
-});
-
-app.post("/login", (req, res) => {
-  res.cookie("user_id", req.body.user_id)
-  res.redirect(`/urls/`)
-});
-
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id")
   res.redirect(`/urls/`)
 });
 
