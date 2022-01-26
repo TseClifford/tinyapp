@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const PORT = 8080; // default port 8080
 
-const generateRandomString = function() {
+const generateRandomString = function () {
   const randomStringLength = 6;
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomString = '';
@@ -16,7 +16,7 @@ const generateRandomString = function() {
   return randomString;
 };
 
-const checkExisting = function(value, key) {
+const checkExisting = function (value, key) {
   let isExisting = false;
 
   Object.values(users).forEach(user => {
@@ -27,7 +27,7 @@ const checkExisting = function(value, key) {
   return isExisting;
 };
 
-const userRetrieval = function(email) {
+const userRetrieval = function (email) {
   let userId;
 
   Object.values(users).forEach(user => {
@@ -91,10 +91,14 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = {
-    "user_id": users[req.cookies["user_id"]],
-  };
-  res.render("urls_new", templateVars);
+  if (req.cookies["user_id"]) {
+    const templateVars = {
+      "user_id": users[req.cookies["user_id"]],
+    };
+    res.render("urls_new", templateVars);
+  } else {
+    res.redirect(`/urls`);
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -113,7 +117,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.post("/login", (req, res) => {
   const userObj = userRetrieval(req.body.email);
-  
+
   if (!userObj) {
     res.status(403).send(`Invalid email.`);
 
@@ -122,13 +126,13 @@ app.post("/login", (req, res) => {
 
   } else {
     res.cookie("user_id", userObj.id);
-    res.redirect(`/urls/`);
+    res.redirect(`/urls`);
   }
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect(`/urls/`);
+  res.redirect(`/urls`);
 });
 
 app.post("/register", (req, res) => {
@@ -146,7 +150,7 @@ app.post("/register", (req, res) => {
       password: req.body.password
     };
     res.cookie('user_id', newUserId);
-    res.redirect(`/urls/`);
+    res.redirect(`/urls`);
   }
 });
 
@@ -158,12 +162,12 @@ app.post("/urls", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
-  res.redirect(`/urls/`);
+  res.redirect(`/urls`);
 });
 
 app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.newURL;
-  res.redirect(`/urls/`);
+  res.redirect(`/urls`);
 });
 
 app.get("/hello", (req, res) => {
