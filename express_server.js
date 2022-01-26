@@ -40,7 +40,7 @@ const users = {
 
 app.get("/", (req, res) => {
   const templateVars = {
-    "user_id": req.cookies["user_id"],
+    "user_id": users[req.cookies["user_id"]],
     greeting: 'Hello World!'
   };
   res.render("hello_world", templateVars);
@@ -48,14 +48,14 @@ app.get("/", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = {
-    "user_id": req.cookies["user_id"],
+    "user_id": users[req.cookies["user_id"]],
   };
   res.render("registration", templateVars);
 });
 
 app.get("/urls", (req, res) => {
   const templateVars = {
-    "user_id": req.cookies["user_id"],
+    "user_id": users[req.cookies["user_id"]],
     urls: urlDatabase,
   };
   res.render("urls_index", templateVars);
@@ -63,14 +63,14 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    "user_id": req.cookies["user_id"],
+    "user_id": users[req.cookies["user_id"]],
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
-    "user_id": req.cookies["user_id"],
+    "user_id": users[req.cookies["user_id"]],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
   };
@@ -89,7 +89,6 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   }
-  console.log(users.newUserId, users)
   res.cookie('user_id', newUserId)
   res.redirect(`/urls/`)
 });
