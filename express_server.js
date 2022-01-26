@@ -155,9 +155,13 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+  if (req.cookies["user_id"]) {
   const newShortURL = generateRandomString();
   urlDatabase[newShortURL] = req.body.longURL;
   res.redirect(`/urls/${newShortURL}`);
+  } else {
+    res.status(403).send(`Invalid for unauthorized users.`);
+  }
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
