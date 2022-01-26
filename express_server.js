@@ -2,9 +2,10 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const e = require("express");
 const PORT = 8080; // default port 8080
 
-function generateRandomString() {
+const generateRandomString = function () {
   const randomStringLength = 6
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   let randomString = ''
@@ -16,6 +17,17 @@ function generateRandomString() {
   return randomString
 }
 
+const duplicateEmail = function (newEmail) {
+  let dupeValue = false
+
+  Object.values(users).forEach(user => {
+    if (user.email === newEmail) {
+      return dupeValue = true;
+    }
+  })
+  return dupeValue
+}
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.set("view engine", "ejs")
@@ -25,15 +37,15 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 }
@@ -83,14 +95,22 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  let newUserId = generateRandomString()
-  users[newUserId] = {
-    id: newUserId,
-    email: req.body.email,
-    password: req.body.password
+  if (!req.body.email || !req.body.password) {
+    res.status(400).send(`Please enter an email and password.`)
+
+  } else if (duplicateEmail(req.body.email) === true) {
+    res.status(400).send(`This email is already registered.`)
+
+  } else {
+    let newUserId = generateRandomString()
+    users[newUserId] = {
+      id: newUserId,
+      email: req.body.email,
+      password: req.body.password
+    }
+    res.cookie('user_id', newUserId)
+    res.redirect(`/urls/`)
   }
-  res.cookie('user_id', newUserId)
-  res.redirect(`/urls/`)
 });
 
 app.post("/urls", (req, res) => {
