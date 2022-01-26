@@ -42,9 +42,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.set("view engine", "ejs");
 
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com",
+// };
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  },
 };
 
 const users = {
@@ -105,13 +116,13 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     "user_id": users[req.cookies["user_id"]],
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
   };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -156,9 +167,15 @@ app.post("/register", (req, res) => {
 
 app.post("/urls", (req, res) => {
   if (req.cookies["user_id"]) {
-  const newShortURL = generateRandomString();
-  urlDatabase[newShortURL] = req.body.longURL;
-  res.redirect(`/urls/${newShortURL}`);
+    const newShortURL = generateRandomString();
+    urlDatabase[newShortURL] = {
+      longURL: '',
+      userID: '',
+    }
+    urlDatabase[newShortURL].longURL = req.body.longURL;
+    urlDatabase[newShortURL].userID = req.cookies["user_id"];
+    console.log(urlDatabase)
+    res.redirect(`/urls/${newShortURL}`);
   } else {
     res.status(403).send(`Invalid for unauthorized users.`);
   }
@@ -170,7 +187,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.newURL;
+  urlDatabase[req.params.shortURL].longURL = req.body.newURL;
   res.redirect(`/urls`);
 });
 
