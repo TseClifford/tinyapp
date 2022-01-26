@@ -33,6 +33,13 @@ app.get("/", (req, res) => {
   res.render("hello_world", templateVars);
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("registration", templateVars);
+});
+
 app.get("/urls", (req, res) => {
   const templateVars = {
     username: req.cookies["username"],
