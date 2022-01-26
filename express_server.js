@@ -115,14 +115,14 @@ app.post("/login", (req, res) => {
   const userObj = userRetrieval(req.body.email);
   
   if (!userObj) {
-    res.status(400).send(`Invalid credentials.`);
+    res.status(403).send(`Invalid email.`);
 
-  } else if (userObj.email === req.body.email && userObj.password === req.body.password) {
-    res.cookie("user_id", userObj.id);
-    res.redirect(`/urls/`);
+  } else if (userObj.password !== req.body.password) {
+    res.status(403).send(`Invalid credentials.`);
 
   } else {
-    res.status(400).send(`Invalid credentials.`);
+    res.cookie("user_id", userObj.id);
+    res.redirect(`/urls/`);
   }
 });
 
