@@ -52,13 +52,7 @@ const userRetrieval = function(email) {
   return userId;
 };
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.set("view engine", "ejs");
-app.use(cookieSession({
-  name: 'session',
-  keys: ["mySuperSecretKey"],
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}));
+const salt = bcrypt.genSaltSync(10);
 
 const urlDatabase = {
   b6UTxQ: {
@@ -75,14 +69,22 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
+    password: bcrypt.hashSync("purple-monkey-dinosaur", salt)
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: bcrypt.hashSync("dishwasher-funk", 10)
+    password: bcrypt.hashSync("dishwasher-funk", salt)
   }
 };
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.set("view engine", "ejs");
+app.use(cookieSession({
+  name: 'session',
+  keys: ["mySuperSecretKey"],
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 
 app.get("/", (req, res) => {
   if (req.session["user_id"]) {
@@ -198,7 +200,7 @@ app.post("/register", (req, res) => {
     users[newUserId] = {
       id: newUserId,
       email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, 10)
+      password: bcrypt.hashSync(req.body.password, salt)
     };
     req.session["user_id"] = newUserId;
     res.redirect(`/urls`);
