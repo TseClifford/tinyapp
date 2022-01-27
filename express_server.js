@@ -17,6 +17,7 @@ const generateRandomString = function() {
   return randomString;
 };
 
+// Checks a value against "users object" with specified key
 const checkExisting = function(value, key) {
   let isExisting = false;
 
@@ -28,6 +29,7 @@ const checkExisting = function(value, key) {
   return isExisting;
 };
 
+// Checks for urls object by user_id, adds to new object and returns filtered object
 const urlsForUser = function(id) {
   let userDB = {};
   Object.entries(urlDatabase).forEach(([key, value]) => {
@@ -38,7 +40,7 @@ const urlsForUser = function(id) {
   return userDB;
 };
 
-
+// Retrieves user id from 'users object' given email
 const userRetrieval = function(email) {
   let userId;
 
@@ -57,8 +59,6 @@ app.use(cookieSession({
   keys: ["mySuperSecretKey"],
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
-
-
 
 const urlDatabase = {
   b6UTxQ: {
@@ -148,6 +148,7 @@ app.get("/urls/:shortURL", (req, res) => {
       longURL: urlDatabase[req.params.shortURL].longURL,
     };
     res.render("urls_show", templateVars);
+
   } else {
     res.status(403).send(`Invalid for unauthorized users.`);
   }
@@ -184,9 +185,11 @@ app.post("/logout", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
+  // Empty string in email or password field
   if (!req.body.email || !req.body.password) {
     res.status(400).send(`Please enter an email and password.`);
 
+    // Existing email
   } else if (checkExisting(req.body.email, 'email') === true) {
     res.status(400).send(`This email is already registered.`);
 
