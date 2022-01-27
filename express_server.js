@@ -4,55 +4,13 @@ const bcrypt = require('bcryptjs');
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const PORT = 8080; // default port 8080
-
-const generateRandomString = function() {
-  const randomStringLength = 6;
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let randomString = '';
-
-  for (let i = 0; i < randomStringLength; i++) {
-    const randomCharIndex = Math.floor((Math.random() * characters.length));
-    randomString += characters[randomCharIndex];
-  }
-  return randomString;
-};
-
-// Checks a value against "users object" with specified key
-const checkExisting = function(value, key) {
-  let isExisting = false;
-
-  Object.values(users).forEach(user => {
-    if (user[key] === value) {
-      return isExisting = true;
-    }
-  });
-  return isExisting;
-};
-
-// Checks for urls object by user_id, adds to new object and returns filtered object
-const urlsForUser = function(id) {
-  let userDB = {};
-  Object.entries(urlDatabase).forEach(([key, value]) => {
-    if (value.userID === id) {
-      userDB[key] = value;
-    }
-  });
-  return userDB;
-};
-
-// Retrieves user id from 'users object' given email
-const userRetrieval = function(email) {
-  let userId;
-
-  Object.values(users).forEach(user => {
-    if (user.email === email) {
-      userId = user;
-    }
-  });
-  return userId;
-};
-
 const salt = bcrypt.genSaltSync(10);
+
+const {
+  generateRandomString,
+  checkExisting,
+  getUserByEmail,
+  urlsForUser } = require("./helpers")
 
 const urlDatabase = {
   b6UTxQ: {
@@ -120,7 +78,7 @@ app.get("/urls", (req, res) => {
   if (req.session["user_id"]) {
     const templateVars = {
       "user_id": users[req.session["user_id"]],
-      urls: urlsForUser(req.session["user_id"]),
+      urls: urlsForUser(req.session["user_id"], urlDatabase),
     };
     res.render("urls_index", templateVars);
   } else {
@@ -167,7 +125,7 @@ app.get("/u/:shortURL", (req, res) => { // shortURL redirect to longURL
 });
 
 app.post("/login", (req, res) => {
-  const userObj = userRetrieval(req.body.email);
+  const userObj = getUserByEmail(req.body.email, users);
 
   if (!userObj) {
     res.status(403).send(`Invalid email.`);
@@ -192,7 +150,7 @@ app.post("/register", (req, res) => {
     res.status(400).send(`Please enter an email and password.`);
 
     // Existing email
-  } else if (checkExisting(req.body.email, 'email') === true) {
+  } else if (checkExisting(req.body.email, 'email', users) === true) {
     res.status(400).send(`This email is already registered.`);
 
   } else {
