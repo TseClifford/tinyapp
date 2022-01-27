@@ -130,7 +130,10 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  if (urlDatabase[req.params.shortURL].userID === req.session["user_id"]) {
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(403).send(`This URL is invalid.`);
+
+  } else if (urlDatabase[req.params.shortURL].userID === req.session["user_id"]) {
     const templateVars = {
       "user_id": users[req.session["user_id"]],
       shortURL: req.params.shortURL,
