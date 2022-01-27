@@ -209,15 +209,6 @@ app.post("/urls", (req, res) => {
   }
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
-  if (urlDatabase[req.params.shortURL].userID === req.session["user_id"]) {
-    delete urlDatabase[req.params.shortURL];
-    res.redirect(`/urls`);
-  } else {
-    res.status(403).send(`Invalid for unauthorized users.`);
-  }
-});
-
 app.post("/urls/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL].userID === req.session["user_id"]) {
     urlDatabase[req.params.shortURL].longURL = req.body.newURL;
@@ -227,8 +218,13 @@ app.post("/urls/:shortURL", (req, res) => {
   }
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+app.post("/urls/:shortURL/delete", (req, res) => {
+  if (urlDatabase[req.params.shortURL].userID === req.session["user_id"]) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect(`/urls`);
+  } else {
+    res.status(403).send(`Invalid for unauthorized users.`);
+  }
 });
 
 app.listen(PORT, () => {
