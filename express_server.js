@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const PORT = 8080; // default port 8080
 
-const generateRandomString = function () {
+const generateRandomString = function() {
   const randomStringLength = 6;
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomString = '';
@@ -17,7 +17,7 @@ const generateRandomString = function () {
   return randomString;
 };
 
-const checkExisting = function (value, key) {
+const checkExisting = function(value, key) {
   let isExisting = false;
 
   Object.values(users).forEach(user => {
@@ -28,7 +28,7 @@ const checkExisting = function (value, key) {
   return isExisting;
 };
 
-const urlsForUser = function (id) {
+const urlsForUser = function(id) {
   let userDB = {};
   Object.entries(urlDatabase).forEach(([key, value]) => {
     if (value.userID === id) {
@@ -39,7 +39,7 @@ const urlsForUser = function (id) {
 };
 
 
-const userRetrieval = function (email) {
+const userRetrieval = function(email) {
   let userId;
 
   Object.values(users).forEach(user => {
@@ -93,17 +93,25 @@ app.get("/", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = {
-    "user_id": users[req.session["user_id"]],
-  };
-  res.render("login", templateVars);
+  if (req.session["user_id"]) {
+    res.redirect(`/urls`);
+  } else {
+    const templateVars = {
+      "user_id": users[req.session["user_id"]],
+    };
+    res.render("login", templateVars);
+  }
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = {
-    "user_id": users[req.session["user_id"]],
-  };
-  res.render("registration", templateVars);
+  if (req.session["user_id"]) {
+    res.redirect(`/urls`);
+  } else {
+    const templateVars = {
+      "user_id": users[req.session["user_id"]],
+    };
+    res.render("registration", templateVars);
+  }
 });
 
 app.get("/urls", (req, res) => {
