@@ -154,8 +154,8 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  if (!urlDatabase[req.params.shortURL]) {
+app.get("/u/:shortURL", (req, res) => { // shortURL redirect to longURL
+  if (!urlDatabase[req.params.shortURL]) { // check if shortURL valid
     res.status(403).send(`This URL is invalid.`);
 
   } else {
@@ -205,7 +205,7 @@ app.post("/register", (req, res) => {
   }
 });
 
-app.post("/urls", (req, res) => {
+app.post("/urls", (req, res) => { // Modify existing shortURL's longURL
   if (req.session["user_id"]) {
     const newShortURL = generateRandomString();
     urlDatabase[newShortURL] = {
@@ -220,7 +220,7 @@ app.post("/urls", (req, res) => {
   }
 });
 
-app.post("/urls/:shortURL", (req, res) => {
+app.post("/urls/:shortURL", (req, res) => { // Create new shortURL
   if (urlDatabase[req.params.shortURL].userID === req.session["user_id"]) {
     urlDatabase[req.params.shortURL].longURL = req.body.newURL;
     res.redirect(`/urls`);
