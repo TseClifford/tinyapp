@@ -27,6 +27,17 @@ const checkExisting = function (value, key) {
   return isExisting;
 };
 
+const urlsForUser = function (id) {
+  let userDB = {};
+  Object.entries(urlDatabase).forEach(([key, value]) => {
+    if (value.userID === id) {
+      userDB[key] = value;
+    }
+  });
+  return userDB;
+};
+
+
 const userRetrieval = function (email) {
   let userId;
 
@@ -49,7 +60,7 @@ const urlDatabase = {
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
-    userID: "aJ48lW"
+    userID: "userRandomID"
   },
 };
 
@@ -91,7 +102,7 @@ app.get("/register", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = {
     "user_id": users[req.cookies["user_id"]],
-    urls: urlDatabase,
+    urls: urlsForUser(req.cookies["user_id"]),
   };
   res.render("urls_index", templateVars);
 });
@@ -166,10 +177,9 @@ app.post("/urls", (req, res) => {
     urlDatabase[newShortURL] = {
       longURL: '',
       userID: '',
-    }
+    };
     urlDatabase[newShortURL].longURL = req.body.longURL;
     urlDatabase[newShortURL].userID = req.cookies["user_id"];
-    console.log(urlDatabase)
     res.redirect(`/urls/${newShortURL}`);
   } else {
     res.status(403).send(`Invalid for unauthorized users.`);
