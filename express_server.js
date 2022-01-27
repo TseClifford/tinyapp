@@ -187,13 +187,21 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect(`/urls`);
+  if (urlDatabase[req.params.shortURL].userID === req.cookies["user_id"]) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect(`/urls`);
+  } else {
+    res.status(403).send(`Invalid for unauthorized users.`);
+  }
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL].longURL = req.body.newURL;
-  res.redirect(`/urls`);
+  if (urlDatabase[req.params.shortURL].userID === req.cookies["user_id"]) {
+    urlDatabase[req.params.shortURL].longURL = req.body.newURL;
+    res.redirect(`/urls`);
+  } else {
+    res.status(403).send(`Invalid for unauthorized users.`);
+  }
 });
 
 app.get("/hello", (req, res) => {
