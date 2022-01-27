@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const bcrypt = require('bcryptjs');
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const PORT = 8080; // default port 8080
@@ -56,7 +57,7 @@ app.set("view engine", "ejs");
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "aJ48lW"
+    userID: "user2RandomID"
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
@@ -68,12 +69,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10)
   }
 };
 
@@ -142,7 +143,7 @@ app.post("/login", (req, res) => {
   if (!userObj) {
     res.status(403).send(`Invalid email.`);
 
-  } else if (userObj.password !== req.body.password) {
+  } else if (!bcrypt.compareSync(req.body.password, userObj.password)) {
     res.status(403).send(`Invalid credentials.`);
 
   } else {
@@ -168,9 +169,10 @@ app.post("/register", (req, res) => {
     users[newUserId] = {
       id: newUserId,
       email: req.body.email,
-      password: req.body.password
+      password: bcrypt.hashSync(req.body.password, 10)
     };
     res.cookie('user_id', newUserId);
+    console.log(users)
     res.redirect(`/urls`);
   }
 });
