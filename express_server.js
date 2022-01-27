@@ -119,12 +119,16 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = {
-    "user_id": users[req.cookies["user_id"]],
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL,
-  };
-  res.render("urls_show", templateVars);
+  if (urlDatabase[req.params.shortURL].userID === req.cookies["user_id"]) {
+    const templateVars = {
+      "user_id": users[req.cookies["user_id"]],
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL].longURL,
+    };
+    res.render("urls_show", templateVars);
+  } else {
+    res.status(403).send(`Invalid for unauthorized users.`);
+  }
 });
 
 app.get("/u/:shortURL", (req, res) => {
