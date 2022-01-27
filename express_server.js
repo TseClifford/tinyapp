@@ -146,8 +146,13 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(403).send(`This URL is invalid.`);
+
+  } else {
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
+  }
 });
 
 app.post("/login", (req, res) => {
