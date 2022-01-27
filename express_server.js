@@ -85,11 +85,11 @@ const users = {
 };
 
 app.get("/", (req, res) => {
-  const templateVars = {
-    "user_id": users[req.session["user_id"]],
-    greeting: 'Hello World!'
-  };
-  res.render("hello_world", templateVars);
+  if (req.session["user_id"]) {
+    res.redirect(`/urls`);
+  } else {
+    res.redirect(`/login`);
+  }
 });
 
 app.get("/login", (req, res) => {
@@ -107,11 +107,15 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = {
-    "user_id": users[req.session["user_id"]],
-    urls: urlsForUser(req.session["user_id"]),
-  };
-  res.render("urls_index", templateVars);
+  if (req.session["user_id"]) {
+    const templateVars = {
+      "user_id": users[req.session["user_id"]],
+      urls: urlsForUser(req.session["user_id"]),
+    };
+    res.render("urls_index", templateVars);
+  } else {
+    res.status(403).send(`Please register or login.`);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -121,7 +125,7 @@ app.get("/urls/new", (req, res) => {
     };
     res.render("urls_new", templateVars);
   } else {
-    res.redirect(`/urls`);
+    res.redirect(`/login`);
   }
 });
 
